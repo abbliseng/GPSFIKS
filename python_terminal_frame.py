@@ -126,7 +126,8 @@ def main_connected():
         options = pick_option([
             ['d', 'Disconnect serial'],
             ['C', 'Clear arduino flash'],
-            ['r', 'Read and save arduino flash to CSV']
+            ['s', 'Save arduino flash to CSV'],
+            ['i', 'Display arduino flash information']
         ], exit_option=True)
     bar()
     return select(options)
