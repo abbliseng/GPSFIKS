@@ -42,7 +42,7 @@ def led_on_off():
 arduino_port = False
 ports = list(serial.tools.list_ports.comports())
 for p in ports:
-    if ("Arduino Uno" in p.description):
+    if ("Arduino MKR1000" in p.description):
         arduino_port = p.name
         break
 if (not arduino_port):
