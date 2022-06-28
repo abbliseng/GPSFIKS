@@ -101,6 +101,12 @@ def connect_serial():
     time.sleep(2)
     return
 
+def disconnect_serial():
+    global ser
+    ser.close()
+    time.sleep(2)
+    return
+
 # MAIN FUNCTIONS
 def main_menu():
     options = pick_option([
@@ -112,9 +118,16 @@ def main_menu():
     return select(options)
 
 def main_connected():
-    options = pick_option([
-        ['c', 'Connect to serial']
-    ], exit_option=1, return_option=1)
+    if not ser:
+        options = pick_option([
+            ['c', 'Connect to serial']
+        ], exit_option=1, return_option=1)
+    else:
+        options = pick_option([
+            ['d', 'Disconnect serial'],
+            ['C', 'Clear arduino flash'],
+            ['r', 'Read and save arduino flash to CSV']
+        ], exit_option=True)
     bar()
     return select(options)
 
@@ -147,8 +160,13 @@ while not exit_program:
         s = main_connected()
         if s == "c":
             connect_serial()
-            print(ser)
-            input()
+            if ser.is_open:
+                serial_connected = True
+        elif s == "d":
+            disconnect_serial()
+            if not ser.is_open:
+                serial_connected = False
+                ser = False
     else:
         exit_program = True
 
