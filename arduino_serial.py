@@ -15,13 +15,13 @@ def led_on_off():
     if user_input =="on":
         print("LED is on...")
         time.sleep(0.1) 
-        ser.write(b'H')
+        ser.write(b'R')
         listen_for_message()
         led_on_off()
     elif user_input =="off":
         print("LED is off...")
         time.sleep(0.1)
-        ser.write(b'L')
+        ser.write(b'C')
         listen_for_message()
         led_on_off()
     elif user_input =="quit" or user_input == "q":

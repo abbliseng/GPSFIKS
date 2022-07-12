@@ -4,6 +4,8 @@ import serial
 import serial.tools.list_ports
 import time
 from colorama import Fore, Back, Style
+import csv
+from datetime import datetime
 
 
 # ██▒▒▒▒▒▒▒▒ 20%
@@ -16,8 +18,38 @@ s = ""
 arduino_port = False
 serial_connected = False
 ser = False
+data = []
+rec = False
+
 
 # UTIL FUNCTIONS
+def listen_for_message():
+    global rec, data, ser
+    time.sleep(0.5)
+    line = ser.read_all()
+    if line:
+        whole_line = line.decode()
+        seperated_lines = whole_line.split("#")
+        seperated_lines.pop()
+        for l in seperated_lines:
+            if l == "SENDING FLASH":
+                data = []
+                rec = True
+                #print(datetime.now())
+            elif l == "FLASH SENT":
+                doc_title = ("GPSFIKS_"+(str(datetime.now()).replace(" ", "").split(".")[0])+".csv").replace(":","_").replace("-","_")
+                with open("./saved_csvs/"+doc_title, mode='w') as f:
+                    fish_writer = csv.writer(f, delimiter=',')
+                    for row in data:
+                        fish_writer.writerow(row);
+                data = []
+                rec = False
+            else:
+                if rec:
+                    data.append(l.split(","))
+
+    return
+
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -127,7 +159,7 @@ def main_connected():
             ['d', 'Disconnect serial'],
             ['C', 'Clear arduino flash'],
             ['s', 'Save arduino flash to CSV'],
-            ['i', 'Display arduino flash information']
+            ['i', '[WIP] Display arduino flash information']
         ], exit_option=True)
     bar()
     return select(options)
@@ -168,6 +200,18 @@ while not exit_program:
             if not ser.is_open:
                 serial_connected = False
                 ser = False
+        elif s == "s":
+            clear()
+            ser.write(b'R')
+            listen_for_message()
+            input("Saved...")
+            pass
+        elif s == "C":
+            clear()
+            ser.write(b'C')
+            listen_for_message()
+            input("Flash cleared...")
+            pass
     else:
         exit_program = True
 
