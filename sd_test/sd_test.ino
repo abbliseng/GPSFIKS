@@ -4,7 +4,8 @@
 File myFile;
 
 // change this to match your SD shield or module;
-const int chipSelect = 6;
+// const int chipSelect = 6;
+const int chipSelect = SDCARD_SS_PIN;
 
 void setup()
 {

@@ -13,7 +13,8 @@ String data = "";
 
 int incomingByte;      // variable stores  serial data
 
-const int chipSelect = 6;
+// const int chipSelect = 6;
+const int chipSelect = SDCARD_SS_PIN;
 File fish_storage;
 String titles = "date,time,lat,long";
 String filename = "fishies.csv";
@@ -41,7 +42,7 @@ void setup() {
 
   // Initialize SD card
   Serial.print("Initializing SD card...");
-  if (!SD.begin()) {
+  if (!SD.begin(chipSelect)) {
     Serial.println("initialization failed!");
     return;
   }
