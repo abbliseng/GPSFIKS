@@ -20,9 +20,10 @@ String filename = "fishies.csv";
 
 int save_delay = 1500;
 
-bool warning = false;
+bool warning = true;
 int last_warning_blink_time = 0;
-bool warning_led_state = false;
+bool warning_led_state = true;
+int init_warning = 0;
 
 bool warning_gps = false;
 bool warning_gps_state = false;
@@ -33,9 +34,10 @@ int last_gps_time = 0;
 void setup() {
   Serial.begin(9600);
   Serial1.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
-  }
+  delay(500);
+  // while (!Serial) {
+  //   ; // wait for serial port to connect. Needed for Leonardo only
+  // }
 
   // Initialize SD card
   Serial.print("Initializing SD card...");
@@ -88,17 +90,7 @@ void loop() {
     }
     last_warning_blink_time = millis();
   } 
-  // CHECK IF WRITING POS TO PC
-  // if (Serial.available() > 0) {
-  //   // read the oldest byte in the serial buffer:
-  //   incomingByte = Serial.read();
-  //   if (incomingByte == 'R') {
-  //     // sendFlashStorageData();
-  //   }
-  //   else if (incomingByte == 'C') {
-  //     // clearFlashStorageData();
-  //   }
-  // }
+
   // CHECK IF SAVING POSITION
   if (savePos) {
       Serial.println("SAVE POS : "+data);
@@ -109,6 +101,11 @@ void loop() {
   // READ THE GPS
   while (Serial1.available()) {
     if (gps.encode(Serial1.read())) {
+      init_warning += 1;
+      if ((init_warning >= 25) && (init_warning <= 100)) {
+        warning = false;
+        init_warning = 101;
+      }
       gps.f_get_position(&lat, &lon, &fix_age); // get latitude and longitude
       gps.get_datetime(&d, &t, &fix_age);
       String latitude = String(lat, 6);
@@ -118,33 +115,25 @@ void loop() {
       String minute = String((t - (t / 1000000 * 1000000)) / 10000);
       String second = String((t - ((t - (t / 1000000 * 1000000)) / 10000) * 10000 - (t / 1000000 * 1000000)) / 100);
 
-      String date_time = String(d) + "," + hour + ":" + minute + ":" + second;
+      int day = d / 10000;
+      int month = (d - day*10000) / 100;
+      int year = (d - (day*10000) - (month*100));
+
+      String day_str = String(day);
+      if (day < 10) {day_str = "0"+String(day);}
+      String month_str = String(month);
+      if (month < 10) {month_str = "0"+String(month);}
+      String year_str = "20"+String(year);
+
+      String date = year_str + "-" + month_str + "-" + day_str;
+
+      String date_time = date + "," + hour + ":" + minute + ":" + second;
       // date,time,lat,long
       data = date_time + "," + latitude + "," + longitude;
       last_gps_time = millis();
     }
   }
 }
-
-// void clearFlashStorageData() {
-//   for (int i = 0; i < current_fish_storage.amount_stored; i++) {
-//     current_fish_storage.fish_positions[i] = "";
-//   }
-//   current_fish_storage.amount_stored = 0;
-//   current_fish_storage.valid = false;
-//   Serial.print("FLASH CLEARED#");
-//   // SAVE THIS TO THE FLASH TOO OBVI
-// }
-
-// void sendFlashStorageData() {
-//   Serial.print("SENDING FLASH#");
-//   for (int i = 0; i < current_fish_storage.amount_stored; i++) {
-//     //Serial.print(String(i)+"#"+current_fish_storage.fish_positions[i]+"#");
-//     Serial.print(current_fish_storage.fish_positions[i]+"#");
-//   }
-//   Serial.print("FLASH SENT#");
-// }
-
 
 // Save to position to the file.
 void savePosition(String data_string) {
