@@ -17,7 +17,7 @@ void loop() {
     String latitude = String(lat, 6);
     String longitude = String(lon, 6);
     Serial.println(latitude + ";" + longitude);
-    //Serial.println(d);
+    Serial.println(d);
 
     int hour = t / 1000000;
     int minute = (t - (t / 1000000 * 1000000)) / 10000;
@@ -27,18 +27,18 @@ void loop() {
     
     updated = false;
   }
+  Serial.println(Serial1.available());
   while (Serial1.available()) {
-    // Serial.println("STILL WORKING");
+    Serial.println("STILL WORKING");
     if (gps.encode(Serial1.read())){
       Serial.println("MAYBE WORKING");
       gps.f_get_position(&lat, &lon, &fix_age); // get latitude and longitude
       gps.get_datetime(&d, &t, &fix_age);
       updated = true;
       
-      /*
       
-      Serial.println(date_time+";" + latitude + ";" + longitude);
-      */
+      
+      // Serial.println(date_time+";" + latitude + ";" + longitude);
     }
     
     //Serial.println(date_time);
